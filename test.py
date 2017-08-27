@@ -1,4 +1,5 @@
 from renderer import *
+"""
 class Index(Node):
     def render(self):
         center('Welcome to test site')
@@ -15,6 +16,6 @@ class Root(Node):
     content = [Index] + [i.Root for i in modules]
     def render(self):
         title('test title')
-        body(
+        with body():
             content(default=Index)
-        )
+"""

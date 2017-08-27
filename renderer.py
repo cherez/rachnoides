@@ -2,19 +2,22 @@ import xml.etree.ElementTree as ET
 
 from typing import List
 
-tags = ['body', 'div', 'hr', ]
+tags = ['body', 'div', 'hr', 'p', 'br']
 
 class Renderer:
     _stack: List[ET.Element]
+    context = ''
+    content = None
 
     class Element:
         def __init_subclass__(cls, **kwargs):
             cls.name = kwargs.get('name', cls.__name__)
 
-        def __init__(self, text=''):
+        def __init__(self, text='', **kwargs):
             self.parent = self.renderer._stack[-1]
             self.element = ET.SubElement(self.parent, self.name)
             self.element.text = text
+            self.element.attrib.update(kwargs)
 
         def __enter__(self):
             self.renderer._stack.append(self.element)
@@ -24,8 +27,7 @@ class Renderer:
 
     class a(Element, name='a'):
         def __init__(self, href, text):
-            super().__init__(text)
-            self.element.attrib['href'] = href
+            super().__init__(text, href=href)
 
     def __init__(self):
         self.root = ET.Element('html')
@@ -49,6 +51,9 @@ class Renderer:
     def title(self, text):
         self.header.find('title').text = text
 
+    def content(self):
+        self.content = self.div(id="content_" + self.context)
+
 default_renderer = Renderer()
 for tag in tags:
     globals()[tag] = getattr(default_renderer, tag)
@@ -56,3 +61,4 @@ render = default_renderer.render
 title = default_renderer.title
 clear = default_renderer.clear
 a = default_renderer.a
+content = default_renderer.content
