@@ -1,3 +1,4 @@
+from renderer import *
 class Index(Node):
     def render(self):
         center('Welcome to test site')
