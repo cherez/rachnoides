@@ -1,0 +1,17 @@
+.small-box {
+	border: thin solid blue;
+	width: 200px;
+	height: 200px;
+	text-align: center;
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+	justify-content: center;
+	margin: 6px;
+}
+
+.section {
+	flex-flow: wrap;
+	display: flex;
+	justify-content: center;
+}

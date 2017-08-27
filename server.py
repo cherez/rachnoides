@@ -26,11 +26,11 @@ class Server:
         node = self.root()
         node.render()
         while default_renderer.content:
-            content = default_renderer.content
+            content = default_renderer.content_element
             if not node.default_content:
                 break
             node = node.default_content()
-            default_renderer.content = None
+            default_renderer.content_element = None
             with content:
                 node.render()
 
@@ -44,11 +44,9 @@ class Index(Node):
     def render(self):
         p('Welcome to test site')
         hr()
-        with div(style="flex-flow: wrap;display: flex;justify-content: center;"):
+        with div(cls='section'):
             for i in range(30):
-                with div(style="border: thin solid blue;width: 200px;height: 200px;text-align:center;display: "
-                               "flex;flex-flow: column;align-items: "
-                               "center;justify-content: center;margin: 6;"):
+                with div(cls='small-box'):
                     a('/link', 'Module name')
                     br()
                     p('Long description of what this module does')
@@ -56,8 +54,10 @@ class Index(Node):
 
 class Root(Node):
     default_content = Index
+    css = open('test.css').read()
     def render(self):
         title('test title')
+        css(self.css)
         with body():
             p('hello world')
             content()

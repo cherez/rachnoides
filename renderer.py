@@ -7,7 +7,7 @@ tags = ['body', 'div', 'hr', 'p', 'br']
 class Renderer:
     _stack: List[ET.Element]
     context = ''
-    content = None
+    content_element = None
 
     class Element:
         def __init_subclass__(cls, **kwargs):
@@ -15,6 +15,8 @@ class Renderer:
 
         def __init__(self, text='', **kwargs):
             self.parent = self.renderer._stack[-1]
+            if 'cls' in kwargs:
+                kwargs['class'] = kwargs.pop('cls')
             self.element = ET.SubElement(self.parent, self.name)
             self.element.text = text
             self.element.attrib.update(kwargs)
@@ -46,13 +48,18 @@ class Renderer:
         self._stack = [self.root]
 
     def render(self):
-        return ET.tostring(self.root, 'unicode', 'html')
+        return ET.tostring(self.root, 'unicode', 'xml', short_empty_elements=True)
 
     def title(self, text):
         self.header.find('title').text = text
 
     def content(self):
-        self.content = self.div(id="content_" + self.context)
+        self.content_element = self.div(id="content_" + self.context)
+
+    def css(self, body):
+        element = ET.SubElement(self.root, 'style')
+        element.attrib['type'] = 'text/css'
+        element.text = body
 
 default_renderer = Renderer()
 for tag in tags:
@@ -62,3 +69,4 @@ title = default_renderer.title
 clear = default_renderer.clear
 a = default_renderer.a
 content = default_renderer.content
+css = default_renderer.css
