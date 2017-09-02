@@ -1,12 +1,29 @@
 from aiohttp import web
-from renderer import *
+from .renderer import *
 
 
 class Node:
     default_content = None
     content = []
+    name = None
 
-    def render(self):
+    async def render(self):
+        pass
+
+    def content_for(self, path):
+        for c in self.content:
+            if c.matches(path):
+                return c(path)
+        return None
+
+    @classmethod
+    def matches(cls, path):
+        return (cls.name or cls.__name__).lower() == path.lower()
+
+    def __init_subclass__(cls, **kwargs):
+        cls.path = (cls.__name__ or cls.__name__).lower() + '/'
+
+    def __init__(self, path=None):
         pass
 
 
@@ -14,6 +31,8 @@ class Server:
     def __init__(self, root):
         self.app = web.Application()
         self.root = root
+        root.name = ''
+        root.path = '/'
         self.app.router.add_route('*', '/{tail:.*}', self.handle)
 
     async def handle(self, request):
@@ -24,43 +43,31 @@ class Server:
         clear()
         top = default_renderer.root
         node = self.root()
-        node.render()
+        default_renderer._context_stack = [node]
+        await node.render()
         while default_renderer.content:
             content = default_renderer.content_element
-            if not node.default_content:
+            if parts:
+                part = parts.pop(0)
+                node = node.content_for(part)
+                if not node:
+                    # TODO: 404
+                    break
+            elif node.default_content:
+                node = node.default_content()
+            else:
                 break
-            node = node.default_content()
             default_renderer.content_element = None
+            default_renderer._context_stack.append(node)
             with content:
-                node.render()
+                await node.render()
 
         return web.Response(text=render(), content_type='text/html')
 
     def run(self, host='127.0.0.1', port=8080):
         web.run_app(self.app, host=host, port=port)
 
-
-class Index(Node):
-    def render(self):
-        p('Welcome to test site')
-        hr()
-        with div(cls='section'):
-            for i in range(30):
-                with div(cls='small-box'):
-                    a('/link', 'Module name')
-                    br()
-                    p('Long description of what this module does')
-
-
-class Root(Node):
-    default_content = Index
-    css = open('test.css').read()
-    def render(self):
-        title('test title')
-        css(self.css)
-        with body():
-            p('hello world')
-            content()
-
-
-Server(Root).run()
+    async def attach(self, loop, host='127.0.0.1', port=8080):
+        await self.app.startup()
+        handler = self.app.make_handler(loop=loop)
+        await loop.create_server(handler, host, port)
