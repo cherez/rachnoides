@@ -1,5 +1,3 @@
-from asyncio import Task, sleep
-
 from aiohttp import web
 from .renderer import *
 
@@ -23,7 +21,7 @@ class Node:
         return (cls.name or cls.__name__).lower() == path.lower()
 
     def __init_subclass__(cls, **kwargs):
-        cls.path = (cls.__name__ or cls.__name__).lower() + '/'
+        cls.path = (cls.name or cls.__name__).lower() + '/'
 
     def __init__(self, path=None):
         pass
