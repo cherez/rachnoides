@@ -1,21 +1,12 @@
-from renderer import *
-"""
+from rachnoides.renderer import *
+from rachnoides.server import *
+
 class Index(Node):
-    def render(self):
+    async def render(self):
+        title('test')
         center('Welcome to test site')
         hr()
-        with div(flex_flow='row'):
-            for module in modules:
-                with div(flex='1 1'):
-                    link(Root / module.Root, module.name)
-                    br()
-                    text(module.description)
 
 
-class Root(Node):
-    content = [Index] + [i.Root for i in modules]
-    def render(self):
-        title('test title')
-        with body():
-            content(default=Index)
-"""
+server = Server(Index)
+server.run()

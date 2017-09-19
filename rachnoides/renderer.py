@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 
 from typing import List
 
-tags = ['body', 'div', 'hr', 'p', 'br']
+tags = ['body', 'center', 'div', 'hr', 'p', 'br']
 
 
 class Renderer:
@@ -65,7 +65,8 @@ class Renderer:
         self.root = ET.Element('html')
         self.header = ET.SubElement(self.root, 'head')
         self.title_element = ET.SubElement(self.header, 'title')
-        self._element_stack = [self.root]
+        self.body_tag = ET.SubElement(self.root, 'body')
+        self._element_stack = [self.root, self.body_tag]
 
     def render(self):
         return ET.tostring(self.root, 'unicode', 'xml', short_empty_elements=True)

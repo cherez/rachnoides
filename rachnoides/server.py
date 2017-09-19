@@ -1,3 +1,5 @@
+from asyncio import Task, sleep
+
 from aiohttp import web
 from .renderer import *
 
@@ -36,9 +38,10 @@ class Server:
         self.app.router.add_route('*', '/{tail:.*}', self.handle)
 
     async def handle(self, request):
+        await sleep(3)
+        print(id(Task.current_task()))
         parts = request.path.split('/')
         parts = [i for i in parts if i]  # remove blanks
-        print(parts)
         default_renderer.context = 'root'
         clear()
         top = default_renderer.root
