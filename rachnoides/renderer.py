@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from .local import Local
 from typing import List
 
-tags = ['body', 'center', 'div', 'hr', 'p', 'br']
+tags = ['b', 'body', 'center', 'div', 'h1', 'hr', 'p', 'br']
 
 
 class Renderer:
@@ -25,7 +25,7 @@ class Renderer:
                 if obj.__class__ in context.content:
                     break
                 contexts.pop()
-            if not contexts:
+            if not contexts and obj.__class__ != self._context_stack[0].__class__:
                 raise ValueError()
             contexts.append(obj)
             return ''.join(i.path for i in contexts)
