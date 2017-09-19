@@ -8,14 +8,14 @@ class Local:
     def __local_dict(self):
         task = Task.current_task()
         if task not in self.__task_dicts:
-            self.__task_dicts[task] = object()
+            self.__task_dicts[task] = {}
         return self.__task_dicts[task]
 
     def __getattr__(self, key):
-        return getattr(self.__local_dict(), key)
+        return self.__local_dict()[key]
 
     def __setattr__(self, key, value):
-        return setattr(self.__local_dict(), key, value)
+        self.__local_dict()[key] = value
 
     def __delattr__(self, key):
-        return delattr(self.__local_dict(), key)
+        del self.__local_dict()[key]

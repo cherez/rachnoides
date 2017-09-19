@@ -38,18 +38,16 @@ class Server:
         self.app.router.add_route('*', '/{tail:.*}', self.handle)
 
     async def handle(self, request):
-        await sleep(3)
-        print(id(Task.current_task()))
         parts = request.path.split('/')
         parts = [i for i in parts if i]  # remove blanks
-        default_renderer.context = 'root'
         clear()
-        top = default_renderer.root
+        renderer = local.renderer
+        renderer.context = 'root'
         node = self.root()
-        default_renderer._context_stack = [node]
+        renderer._context_stack = [node]
         await node.render()
-        while default_renderer.content:
-            content = default_renderer.content_element
+        while renderer.content:
+            content_tag = renderer.content_element
             if parts:
                 part = parts.pop(0)
                 node = node.content_for(part)
@@ -60,9 +58,9 @@ class Server:
                 node = node.default_content()
             else:
                 break
-            default_renderer.content_element = None
-            default_renderer._context_stack.append(node)
-            with content:
+            renderer.content_element = None
+            renderer._context_stack.append(node)
+            with content_tag:
                 await node.render()
 
         return web.Response(text=render(), content_type='text/html')

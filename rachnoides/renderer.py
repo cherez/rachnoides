@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 
+from .local import Local
 from typing import List
 
 tags = ['body', 'center', 'div', 'hr', 'p', 'br']
@@ -83,12 +84,28 @@ class Renderer:
         element.text = body
 
 
+local = Local()
+
+
+def wrap_method(name):
+    def inner(*args, **kwargs):
+        func = getattr(local.renderer, name)
+        return func(*args, **kwargs)
+
+    inner.name = name
+    return inner
+
+
 default_renderer = Renderer()
 for tag in tags:
-    globals()[tag] = getattr(default_renderer, tag)
-render = default_renderer.render
-title = default_renderer.title
-clear = default_renderer.clear
-a = default_renderer.a
-content = default_renderer.content
-css = default_renderer.css
+    globals()[tag] = wrap_method(tag)
+
+a = wrap_method('a')
+content = wrap_method('content')
+css = wrap_method('css')
+render = wrap_method('render')
+title = wrap_method('title')
+
+
+def clear():
+    local.renderer = Renderer()
